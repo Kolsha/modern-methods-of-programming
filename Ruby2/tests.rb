@@ -3,13 +3,14 @@ require "test/unit"
 require "benchmark"
 
 $slow_executor = Proc.new do |x|
-  sleep(0.1)
+  sleep(0.001)
   x
 end
 
 class TestSolution < Test::Unit::TestCase
 
   TEST_ARRAY_SIZE = 50
+
   def test_all
     a = [*1..TEST_ARRAY_SIZE]
     sync = nil
