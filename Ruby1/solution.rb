@@ -1,5 +1,3 @@
-require "test/unit"
-
 def recursive_solution(start, arr, max_len)
   arr = arr.uniq
   result = []
@@ -20,12 +18,6 @@ def recursive_solution(start, arr, max_len)
 end
 
 
-puts recursive_solution('', %w(a b c), 0)
-
-
-# puts recursive_solution('', str, n)
-
-
 def n_times_sol(str, n)
   str = str.uniq
   if n < 1 || str.empty?
@@ -40,7 +32,7 @@ def n_times_sol(str, n)
 
       # reduce acc = array
       # res.select { |r| (r[-1] != char) && r.length < n }.map { |r| new_res << r + char }
-      res += res.select { |r| (r[-1] != char) && r.length < n }.reduce([]){ |new_res, r| new_res << ( r + char)}
+      res += res.select { |r| (r[-1] != char) && r.length < n && !res.include?(r + char) }.reduce([]) { |new_res, r| new_res << (r + char) }
 
       #res = new_res
     }
@@ -48,26 +40,10 @@ def n_times_sol(str, n)
     res = res[n + 1..-1]
 
   end
-# res = res.select{|el| el.length == n}
+
+  res = res.select { |el| el.length == n }
   return res.sort
 end
 
-
-# puts n_times_sol(str, n)
-
-
-# str.map do |c|
-#   perm = c
-#   (n-1).times{
-#     str.select{|n| c!=n}.map {|n| perm += n}
-#   }
-#   puts perm
-# end
-#
-# n.times do
-#   puts str
-# end
-
-# puts str.reduce(''){|f, i| f + i}
 
 
