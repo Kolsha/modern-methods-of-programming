@@ -46,27 +46,10 @@ def n_times_sol(str, n)
 end
 
 def reduce_sol(str, n)
-  Array.new(n, str.chars.to_a.uniq).reduce([[]]) do |acc, el|
-    # el.select { |e| acc.select { |a| a[-1] != e } }.map { |e| e }
-    # el.map { |e|
-    #   acc.select { |a| a[-1] != e }.map { |a| a << e }
-    # }
-    #
 
-    # acc.each { |e|
-    #   puts "acc:"+ e.length.to_s
-    #   puts e
-    # }
+  return [] if n < 1
 
-    # res = el.map { |e|
-    #   acc.select { |a| a.last == nil || a.last[0] != e }.map { |a|
-    #     # puts "sel"
-    #     # puts a[-1].class
-    #     # puts a[-1][0].class if a[-1]
-    #     # puts e.class
-    #     (a + [e])
-    #   }
-    # }.reduce([]) {|a, e| a + e}
+  Array.new(n, str.chars.to_a.uniq).reduce([[]]) { |acc, el|
 
     acc.map { |a|
       el.select { |e| a.last == nil || a.last[0] != e }.map { |e|
@@ -75,15 +58,7 @@ def reduce_sol(str, n)
       }
     }.reduce([]) { |a, e| a + e }
 
-    # res.each { |e|
-    #   puts "el:" + e.length.to_s
-    #   puts e
-    # }
-
-    # res
-
-
-  end
+  }.map { |e| e.join('') }
 end
 
 # arr = []
@@ -93,7 +68,7 @@ end
 # puts arr, n
 
 
-reduce_sol('abc', 3).each do |e|
+reduce_sol('abc', 10).each do |e|
   puts
   puts e
 end
