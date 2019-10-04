@@ -94,8 +94,41 @@
                          )
                        ))
       itr (partial itr_p itr_p)]
-  (itr cube 1/10 0 2)
-  (itr cube 1/10 0 3)
+  )
+
+
+(defn integralT
+  "Integral by Trapezoidal rule"
+  ([f]
+   (integralT f 1/10)
+   )
+
+  ([f step]
+   {:pre [(> step 0)]}
+
+
+
+   (let [itr_p (memoize (fn [rec, f, step, a, b]
+                          (println a b)
+                          (if (> (+ a step) b)
+
+                            0
+
+                            (+ (trap-mem f (- b step) b)
+                               (rec rec f step a (- b step)
+                                    ))
+
+                            )
+                          ))
+         itr (partial itr_p itr_p)]
+
+     (fn [x]
+       (itr f step 0 x)
+       )
+
+     )
+
+   )
   )
 
 
@@ -145,25 +178,25 @@
 
 
 
-(def it-mem (memoize it))
-
-(defn integralT
-  "Integral by Trapezoidal rule"
-  ([f]
-   (integralT f 100)
-   )
-
-  ([f step]
-   {:pre [(> step 0)]}
-   (memoize (fn [x]
-              (let [f-mem (memoize f)]
-                (+ (it-mem f-mem step 0 (- x step)) (it-mem f-mem step (- x step) x))
-                )
-
-              )
-            )
-   )
-  )
+;(def it-mem (memoize it))
+;
+;(defn integralT
+;  "Integral by Trapezoidal rule"
+;  ([f]
+;   (integralT f 100)
+;   )
+;
+;  ([f step]
+;   {:pre [(> step 0)]}
+;   (memoize (fn [x]
+;              (let [f-mem (memoize f)]
+;                (+ (it-mem f-mem step 0 (- x step)) (it-mem f-mem step (- x step) x))
+;                )
+;
+;              )
+;            )
+;   )
+;  )
 
 
 ;
@@ -177,9 +210,9 @@
 ;
 ;(println (itrcube 2))
 
-;(def it-long (integralT cube 0.00001))
-;(it-long 1.0)
-;(my_time (it-long 1.0))
+(def it-long (integralT cube 1/10))
+;(it-long 1)
+;(my_time (it-long 1))
 
 
 
