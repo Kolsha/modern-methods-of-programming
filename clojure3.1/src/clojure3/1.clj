@@ -1,11 +1,23 @@
 (ns clojure3.1)
 
-(def naturals
-  (lazy-seq
-    (cons 1 (map (fn [x]
-                   (println x)
-                   (inc x)
-                   ) naturals))))
+
+(defmacro my_time
+  "Evaluates expr.  Returns time of
+ expr."
+  {:added "1.0"}
+  [expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     (list (/ (double (- (. System (nanoTime)) start#)) 1000000.0) ret#)
+     ))
+
+
+;(def naturals
+;  (lazy-seq
+;    (cons 1 (map (fn [x]
+;                   (println x)
+;                   (inc x)
+;                   ) naturals))))
 
 
 (defn trap [f a b]
@@ -37,7 +49,7 @@
                                                 )
                                               ) it))))
 
-(take 10 it)
+;(take 10 it)
 
 (defn integralT
   "Integral by Trapezoidal rule"
@@ -49,29 +61,15 @@
    {:pre [(> step 0)]}
 
 
-   ;(defn it []
-   ;  (lazy-seq
-   ;    (cons (list (trap-mem f 0 step) step) (map (fn [x]
-   ;                                                 (let [cur_v (first x)
-   ;                                                       cur_p (last x)
-   ;                                                       next_p (+ (last x) step)]
-   ;
-   ;                                                   (println x)
-   ;                                                   (list (+ cur_v
-   ;                                                            (trap-mem cube cur_p next_p)
-   ;                                                            ) next_p)
-   ;                                                   )
-   ;                                                 ) it))))
-
    (letfn [(lz []
              (lazy-seq (cons (list (trap-mem f 0 step) step) (map (fn [x]
                                                                     (let [cur_v (first x)
                                                                           cur_p (last x)
                                                                           next_p (+ (last x) step)]
 
-                                                                      (println x)
+                                                                      ;(println x)
                                                                       (list (+ cur_v
-                                                                               (trap-mem cube cur_p next_p)
+                                                                               (trap-mem f cur_p next_p)
                                                                                ) next_p)
                                                                       )
                                                                     ) (lz))))
@@ -85,12 +83,13 @@
   )
 
 
-(def it-long (integralT cube 1/10))
-
-(let [f cube
-      step 1/10]
-  (list (trap-mem f 0 step) step)
-  )
+;(def it-long (integralT cube 1/10))
+;(def it1-long (integralT cube 1/10000000))
+;
+;(let [f cube
+;      step 1/10]
+;  (list (trap-mem f 0 step) step)
+;  )
 ;(time (nth naturals 10))
 ;(time (nth naturals 21))
 ;
