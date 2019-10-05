@@ -2,6 +2,9 @@
 
   )
 
+;https://stackoverflow.com/questions/12955024/recursion-inside-let-function
+;http://danmidwood.com/content/2013/02/24/exploring-clojure-memoization.html
+;https://blog.jayway.com/2011/04/02/numerical-integration-with-precision/
 
 (defmacro my_time
   "Evaluates expr.  Returns time of
@@ -10,7 +13,7 @@
   [expr]
   `(let [start# (. System (nanoTime))
          ret# ~expr]
-     (/ (double (- (. System (nanoTime)) start#)) 1000000.0)
+     (list (/ (double (- (. System (nanoTime)) start#)) 1000000.0) ret#)
      ))
 
 (defn cube
@@ -18,25 +21,29 @@
   (* x x x)
   )
 
-
-;(defn max_arities [v]
-;  (apply max (->> v meta :arglists (map count))))
-
-(defn it [f, step, a, b]
-  (let [n (/ (- b a) step)
-        rng (range 1 n)
-        fab (/ (+ (f a) (f b)) 2)
-        ]
-
-    (* step
-       (+ fab
-          (reduce + (map (fn [el] (f (+ a (* el step)))) rng))
-          )
-       )
-
-    )
-
+(defn ninth [x]
+  (* (cube x) (cube x))
   )
+
+
+
+;(defn it [f, step, a, b]
+;  (let [n (/ (- b a) step)
+;        rng (range 1 n)
+;        fab (/ (+ (f a) (f b)) 2)
+;        ]
+;
+;    (* step
+;       (+ fab
+;          (reduce + (map (fn [el] (f (+ a (* el step)))) rng))
+;          )
+;       )
+;
+;    )
+;
+;  )
+
+(def it-mem (memoize it))
 
 
 (defn trap [f a b]
@@ -48,53 +55,6 @@
 
 (def trap-mem (memoize trap))
 
-;(defn itr [f, step, a, b & {:keys [base] :or {base 0}}]
-;  (if (>= a b)
-;
-;    0
-;
-;    (#'itr f step (+ a step) b :base (+ (trap-mem f a (+ a step))
-;                                  base))
-;
-;    )
-;  )
-
-;(defn itr [f_, step, a, b]
-;  (letfn [(inner [f, step, a, b]
-;            (println a b)
-;            (if (> (+ a step) b)
-;
-;              0
-;
-;              (+ (trap-mem f (- b step) b)
-;                 (inner1 f step 0 (- b step)
-;                         ))
-;
-;              )
-;
-;            )
-;          (inner1 (memoize inner))
-;          ]
-;
-;    (println (inner f_, step, a, b))
-;    )
-;
-;  )
-
-(let [itr_p (memoize (fn [rec, f, step, a, b]
-                       (println a b)
-                       (if (> (+ a step) b)
-
-                         0
-
-                         (+ (trap-mem f (- b step) b)
-                            (rec rec f step 0 (- b step)
-                                 ))
-
-                         )
-                       ))
-      itr (partial itr_p itr_p)]
-  )
 
 
 (defn integralT
@@ -106,10 +66,10 @@
   ([f step]
    {:pre [(> step 0)]}
 
-
+   ; set less params
 
    (let [itr_p (memoize (fn [rec, f, step, a, b]
-                          (println a b)
+                          ;(println a b)
                           (if (> (+ a step) b)
 
                             0
@@ -132,85 +92,52 @@
   )
 
 
-;(def itr (memoize itr))
-;(def itr
-;  (memoize (fn [f, step, a, b]
+;(let [
+;      itr1 (fn [base, rec, f, step, a, b]
 ;
-;             (if (>= a b)
-;
-;               0
-;               (+ (trap-mem f a (+ a step))
-;                  (itr f step (+ a step) b))
-;               )
-;
+;             (+
+;                base (rec rec f step a (- b step)))
 ;             )
-;           )
-;  )
-
-;(def itr
-;  (memoize (letfn [(my_loop [f, step, a, b & {:keys [base] :or {base 0}}]
-;                     (println a b)
-;                     (if (< a b)
-;                       (recur f step (+ a step) b (+ (trap-mem f a (+ a step))
-;                                                     base))
 ;
+;      itr_p (memoize (fn [rec, f, step, a, b]
+;                       ;(println a b)
+;                       (if (> (+ a step) b)
 ;
-;                       0
+;                         0
+;                         (itr1 (trap-mem f (- b step) b) rec f step a b)
+;                         )
 ;                       )
+;                     )
+;      itr (partial itr_p itr_p)]
 ;
-;                     )]
+;  (my_time (println (itr cube 1/1000 0 6)))
+;  (my_time (println (itr cube 1/1000 0 6)))
 ;
-;             )
-;           )
+;
+;
+;
 ;  )
 
-;(def itr
-;  (memoize (letfn [(my_loop [f, step, a, b & {:keys [base] :or {base 0}}]
-;                     (println a b)
+;(letfn [(inter [f, step, a, b]
+;          (println a b)
 ;
+;          (if (> (+ a step) b)
 ;
-;                     )]
+;            0
 ;
-;             )
-;           )
-;  )
-
-
-
-
-;(def it-mem (memoize it))
+;            (recur  f step a (- b step)
 ;
-;(defn integralT
-;  "Integral by Trapezoidal rule"
-;  ([f]
-;   (integralT f 100)
-;   )
-;
-;  ([f step]
-;   {:pre [(> step 0)]}
-;   (memoize (fn [x]
-;              (let [f-mem (memoize f)]
-;                (+ (it-mem f-mem step 0 (- x step)) (it-mem f-mem step (- x step) x))
-;                )
-;
-;              )
+;                 :base (+ (trap-mem f (- b step) b)
+;                          base)
+;                 )
 ;            )
-;   )
-;  )
+;
+;          )])
 
 
-;
-;(it cube 0.001 0 2.0)
-;;(println (itr cube 0.001 0 2.0))
-;
-;(defn itrcube [x]
-;  (itr cube 0.001 0 x)
-;  )
-;
-;
-;(println (itrcube 2))
 
-(def it-long (integralT cube 1/10))
+
+;(def it-long (integralT cube 1/10))
 ;(it-long 1)
 ;(my_time (it-long 1))
 

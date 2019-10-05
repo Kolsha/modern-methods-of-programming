@@ -8,12 +8,42 @@
 
 
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))
-    (let [int_cube (integralT cube 1000000)]
+(deftest time-small-test
+  (testing "Timing small"
+    (let [int_cube (integralT cube 1/10)
+          first_call (first (my_time (int_cube 3)))
+          second_call (first (my_time (int_cube 5)))
+          third_call (first (my_time (int_cube 6)))
+
+          ]
+
+      (is (> first_call second_call))
+      (is (> first_call third_call))
+
+      (is (> second_call third_call))
 
       )
 
     )
+
+  )
+
+(deftest time-big-test
+  (testing "Timing small"
+    (let [int_cube (integralT cube 1/10)
+          first_call (first (my_time (int_cube 10)))
+          second_call (first (my_time (int_cube 5)))
+          third_call (first (my_time (int_cube 15)))
+
+          ]
+
+      (is (> first_call second_call))
+      (is (> first_call third_call))
+
+      (is (< second_call third_call))
+
+      )
+
+    )
+
   )
