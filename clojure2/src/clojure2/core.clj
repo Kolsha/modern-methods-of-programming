@@ -43,7 +43,7 @@
 ;
 ;  )
 
-(def it-mem (memoize it))
+;(def it-mem (memoize it))
 
 
 (defn trap [f a b]
@@ -68,16 +68,21 @@
 
    ; set less params
 
-   (let [itr_p (memoize (fn [rec, f, step, a, b]
+   (let [a 0                                                ;can be changed to any start point
+         itr_p (memoize (fn [rec, f, step, a, b]
                           ;(println a b)
-                          (if (> (+ a step) b)
+                          (let [pos (* (int (/ b step)) step)]
 
-                            0
+                            (if (> (+ a step) b)
 
-                            (+ (trap-mem f (- b step) b)
-                               (rec rec f step a (- b step)
-                                    ))
+                              0
 
+                              (+ (trap-mem f (- pos step) pos)
+                                 (trap-mem f pos b)
+                                 (rec rec f step a (- pos step)
+                                      ))
+
+                              )
                             )
                           ))
          itr (partial itr_p itr_p)]
