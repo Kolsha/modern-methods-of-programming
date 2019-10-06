@@ -4,6 +4,30 @@
 
 
 
+(deftest value-small-test-ninth
+  (testing "Value test small"
+    (let [
+          step 1/10
+          int_ninth (integralT ninth step)
+          first_call (int_ninth 1)
+          second_call (int_ninth 2)
+          third_call (int_ninth 3)
+
+          ]
+      ;(println first_call second_call third_call)
+
+      (is (< (- first_call 1/10) step))
+
+      (is (< (- second_call 1024/10) step))
+
+      (is (< (- third_call 59049/10) step))
+
+      )
+
+    )
+
+  )
+
 
 (deftest value-small-test
   (testing "Value test small"

@@ -7,7 +7,7 @@
 ;https://blog.jayway.com/2011/04/02/numerical-integration-with-precision/
 
 (defmacro my_time
-  "Evaluates expr.  Returns time of
+  "Evaluates expr. Returns time of
  expr."
   {:added "1.0"}
   [expr]
@@ -17,33 +17,17 @@
      ))
 
 (defn cube
+  "return x^3"
   [x]
   (* x x x)
   )
 
 (defn ninth [x]
+  "return x^9"
   (* (cube x) (cube x))
   )
 
 
-
-;(defn it [f, step, a, b]
-;  (let [n (/ (- b a) step)
-;        rng (range 1 n)
-;        fab (/ (+ (f a) (f b)) 2)
-;        ]
-;
-;    (* step
-;       (+ fab
-;          (reduce + (map (fn [el] (f (+ a (* el step)))) rng))
-;          )
-;       )
-;
-;    )
-;
-;  )
-
-;(def it-mem (memoize it))
 
 
 (defn trap [f a b]
@@ -66,10 +50,10 @@
   ([f step]
    {:pre [(> step 0)]}
 
-   ; set less params
+
 
    (let [a 0                                                ;can be changed to any start point
-         itr_p (memoize (fn [rec, f, step, a, b]
+         itr_p (memoize (fn [rec, b]
                           ;(println a b)
                           (let [pos (* (int (/ b step)) step)]
 
@@ -79,7 +63,7 @@
 
                               (+ (trap-mem f (- pos step) pos)
                                  (trap-mem f pos b)
-                                 (rec rec f step a (- pos step)
+                                 (rec rec (- pos step)
                                       ))
 
                               )
@@ -88,63 +72,10 @@
          itr (partial itr_p itr_p)]
 
      (fn [x]
-       (itr f step 0 x)
+       (itr x)
        )
 
      )
 
    )
   )
-
-
-;(let [
-;      itr1 (fn [base, rec, f, step, a, b]
-;
-;             (+
-;                base (rec rec f step a (- b step)))
-;             )
-;
-;      itr_p (memoize (fn [rec, f, step, a, b]
-;                       ;(println a b)
-;                       (if (> (+ a step) b)
-;
-;                         0
-;                         (itr1 (trap-mem f (- b step) b) rec f step a b)
-;                         )
-;                       )
-;                     )
-;      itr (partial itr_p itr_p)]
-;
-;  (my_time (println (itr cube 1/1000 0 6)))
-;  (my_time (println (itr cube 1/1000 0 6)))
-;
-;
-;
-;
-;  )
-
-;(letfn [(inter [f, step, a, b]
-;          (println a b)
-;
-;          (if (> (+ a step) b)
-;
-;            0
-;
-;            (recur  f step a (- b step)
-;
-;                 :base (+ (trap-mem f (- b step) b)
-;                          base)
-;                 )
-;            )
-;
-;          )])
-
-
-
-
-;(def it-long (integralT cube 1/10))
-;(it-long 1)
-;(my_time (it-long 1))
-
-
-
