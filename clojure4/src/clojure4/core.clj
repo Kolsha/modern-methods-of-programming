@@ -1,87 +1,19 @@
 (ns clojure4.core
   (:require
-    [clojure4.atoms :refer :all])
-  )
-
-
-
-
-
-(defn distribute [pred exprs]
-  (println exprs)
-  (let [
-        matched (filter pred exprs)
-        other (remove pred exprs)
-
-        res (apply concat (map (fn [x] (println x) (args x)) matched))
-        ;res (concat res)
-        ]
-
-    (if (empty? other)
-      res
-      (apply concat (cons res (list other)))
-      )
-
+    [clojure4.atoms :refer :all]
+    [clojure4.disjunction :refer :all]
+    [clojure4.conjunction :refer :all]
+    [clojure4.negation :refer :all]
     )
-
   )
 
-(defn disjunction? [expr]
-  {:pre [(not (keyword? expr))]}
-  (= ::or (first expr)))
-
-(defn disjunction [expr & rest]
-  "Boolean or(|) "
-  (cond
-
-
-    (empty? rest) (if (disjunction? expr) expr )
 
 
 
 
-    :else (cons ::or (cons expr rest)))
 
-  )
-
-;(distribute nx_or_y ny_or_z)
-
-
-;(assert (disjunction? (disjunction (variable :a) (variable :b))))
-
-
-(defn negation? [expr]
-  {:pre [(not (keyword? expr))]}
-  (= ::not (first expr)))
-
-(defn negation [expr]
-  "Boolean not(!,~) "
-  {:pre [(not (keyword? expr))]}
-  (if (negation? expr)
-    (args expr)
-    (cons ::not expr)
-    )
-
-  )
-
-;(assert (negation? (negation (variable :a))))
-
-
+;(collapse-consts (list (variable :a) (variable :b) (negation (variable :a))))
 ;
-
-
-(defn conjunction? [expr]
-  {:pre [(not (keyword? expr))]}
-  (= ::and (first expr)))
-
-
-(defn conjunction [expr & rest]
-  "Boolean and(&) "
-  (cons ::and (cons expr rest))
-  )
-
-;(assert (conjunction? (conjunction (variable :a) (variable :b))))
-
 
 (defn propagate-neg [expr]
   {:pre [(not (keyword? expr))]}
@@ -89,27 +21,60 @@
   (cond
     ;(negation? expr) (propagate-neg (args expr))
 
+    (disjunction? expr) (apply conjunction (map (fn [x] (propagate-neg x)) (args expr)))
+
     (conjunction? expr) (apply disjunction (map (fn [x] (propagate-neg x)) (args expr)))
 
-    (disjunction? expr) (apply conjunction (map (fn [x] (propagate-neg x)) (args expr)))
+
 
     :else (negation expr))
   )
 
 
-(defn invert [expr]
-  "Invert term"
+(defn distribute [expr]
+  {:pre [(not (keyword? expr))]}
+  (let [sel-or (fn [x] (and (not (keyword? x)) (disjunction? x)))
+        rem-or (fn [x] (or (keyword? x) (disjunction? x)))
+        or_terms (filter sel-or expr)
+        other (remove rem-or expr)
+        ]
 
-  (cond
+    ;(println or_terms)
+    ;(println other)
+    (cond
+      (and (conjunction? expr) (not-empty or_terms))
+      (let [ands (map (fn [el]
+                        (println el)
+                        (map
+                          (fn [x] (println x)
+                            (apply conjunction (cons x other)))
 
-    (negation? expr) (rest expr)
+                          (args el))
+                        )
 
-    (conjunction? expr) (disjunction (rest expr))
+                      or_terms)]
 
-    (disjunction? expr) (conjunction (rest expr))
+        (apply disjunction (apply concat ands))
 
-    :else expr))
+        )
 
+      ;(reduce (fn [acc, el]
+      ;          (let [els (args el)
+      ;                ]
+      ;
+      ;
+      ;
+      ;            )
+      ;          ) or_terms
+      ;        )
+
+
+      :else expr)
+
+    )
+  )
+
+;(distribute (conjunction (variable :a) (variable :b) (disjunction (variable :c) (variable :d))))
 
 
 
@@ -131,32 +96,36 @@
 
 (def pre_f (disjunction nx_or_y (negation ny_or_z)))
 
+(def pre1 (propagate-neg pre_f))
+
+(def pre (distribute pre1))
+
 ;(disjunction nx_or_y ny_or_z)
 
 ;(distribute disjunction? (rest (disjunction nx_or_y ny_or_z (conjunction x y))))
 
-;(let [
-;      x (variable :X)
-;      y (variable :Y)
-;      z (variable :Z)
-;      nx (negation x)
-;      ny (negation y)
-;
-;      nx_or_y (disjunction nx y)
-;      ny_or_z (disjunction ny z)
-;
-;      pre_f (disjunction nx_or_y (negation ny_or_z))
-;      f (negation pre_f)
-;
-;      ]
-;  ;(assert (= (invert ab) aorb))
-;
-;  ;(assert (= (invert ab) aorb))
-;  (println (propagate-neg pre_f))
-;  ;(map #(negation % ) (rest naorb))
-;  ;)
-;
-;  )
+(let [
+      x (variable :X)
+      y (variable :Y)
+      z (variable :Z)
+      nx (negation x)
+      ny (negation y)
+
+      nx_or_y (disjunction nx y)
+      ny_or_z (disjunction ny z)
+
+      pre_f (disjunction nx_or_y (negation ny_or_z))
+      f (negation pre_f)
+
+      ]
+  ;(assert (= (invert ab) aorb))
+
+  ;(assert (= (invert ab) aorb))
+  (println (distribute (propagate-neg pre_f)))
+  ;(map #(negation % ) (rest naorb))
+  ;)
+
+  )
 
 
 
@@ -203,3 +172,6 @@
 ;       (variable :db)))
 ;
 ;(negation (negation (variable :a)))
+
+
+
