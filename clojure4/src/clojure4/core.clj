@@ -1,33 +1,30 @@
-(ns clojure4.core)
+(ns clojure4.core
+  (:require
+    [clojure4.atoms :refer :all])
+  )
 
 
-(defn args [expr]
-  (rest expr))
 
 
 
-(defn variable [name]
-  {:pre [(keyword? name)]}
-  (list ::var name))
+(defn distribute [pred exprs]
+  (println exprs)
+  (let [
+        matched (filter pred exprs)
+        other (remove pred exprs)
 
-(defn variable? [expr]
-  {:pre [(not (keyword? expr))]}
-  (= (first expr) ::var))
+        res (apply concat (map (fn [x] (println x) (args x)) matched))
+        ;res (concat res)
+        ]
 
-(assert (variable? (variable :a)))
+    (if (empty? other)
+      res
+      (apply concat (cons res (list other)))
+      )
 
+    )
 
-(defn variable-name [v]
-  {:pre [(not (keyword? v))]}
-  (second v))
-
-(defn same-variables? [v1 v2]
-  (and
-    (variable? v1)
-    (variable? v2)
-    (= (variable-name v1)
-       (variable-name v2))))
-
+  )
 
 (defn disjunction? [expr]
   {:pre [(not (keyword? expr))]}
@@ -35,19 +32,10 @@
 
 (defn disjunction [expr & rest]
   "Boolean or(|) "
-  (println expr rest)
-  ;(println (type expr) (type rest))
-
   (cond
-    ;(and (empty? rest)) (if (disjunction? expr) expr (cons ::or (cons expr rest)) )
-    ;
-    ;(and (disjunction? expr) (not (disjunction? rest))) (cons expr rest)
-    ;
-    ;(and (disjunction? rest) (not (disjunction? expr))) (cons rest expr)
-    ;
-    ;(and (disjunction? expr) (disjunction? rest)) (cons ::or (cons (args expr) (args rest)))
 
 
+    (empty? rest) (if (disjunction? expr) expr )
 
 
 
@@ -56,7 +44,7 @@
 
   )
 
-
+;(distribute nx_or_y ny_or_z)
 
 
 ;(assert (disjunction? (disjunction (variable :a) (variable :b))))
@@ -138,9 +126,14 @@
 (def nx_or_y (disjunction nx y))
 (def ny_or_z (disjunction ny z))
 
+(def triple_or (disjunction nx_or_y ny_or_z (conjunction x y z)))
+
+
 (def pre_f (disjunction nx_or_y (negation ny_or_z)))
 
-(disjunction nx_or_y ny_or_z)
+;(disjunction nx_or_y ny_or_z)
+
+;(distribute disjunction? (rest (disjunction nx_or_y ny_or_z (conjunction x y))))
 
 ;(let [
 ;      x (variable :X)
