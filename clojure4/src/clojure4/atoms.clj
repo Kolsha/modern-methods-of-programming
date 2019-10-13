@@ -17,23 +17,34 @@
 (declare const-val)
 
 (defn negation? [expr]
+
   {:pre [(not (keyword? expr))]}
-  (= ::not (first expr)))
+
+  (cond
+    (const? expr) (not (const-val expr))
+
+    :else (= ::not (first expr))
+    )
+  )
 
 (defn negation [expr]
   "Boolean not(!,~) "
+  "a => !a, !a => a, true => false and so on"
+  "(a & b ...) => !(a & b ...)"
   {:pre [(not (keyword? expr))]}
 
   (cond
     (const? expr) (const (not (const-val expr)))
-    (negation? expr) (args expr)
-    :else (cons ::not expr)
+    (negation? expr) (first (args expr))
+    :else (cons ::not (list expr))
     )
 
   )
 
 
 (defn collapse-consts [expr replace-val]
+  "finds possible constants and replaces its on replace-val"
+  "(a !a b (a | b) !(a | b) c (a & c)) => (b c (a & c) replace-val)"
   (let [
         poss-consts (reduce (fn [acc, el]
                               (if
@@ -63,7 +74,9 @@
 
 
 (defn expand [pred exprs replace-val]
-  ;(println exprs)
+
+  "finds expr by pred and expand them with replaced duplicated and collapsed constants"
+  "(a (pred b c d) (pred d a) (another-pred e d)) => (a b c d (another-pred e d)) "
   (let [
         matched (filter pred exprs)
         other (remove pred exprs)

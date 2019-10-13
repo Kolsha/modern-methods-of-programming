@@ -1,25 +1,17 @@
 (ns clojure4.core
   (:require
     [clojure4.atoms :refer :all]
-    [clojure4.disjunction :refer :all]
-    [clojure4.conjunction :refer :all]
+    [clojure4.junction :refer :all]
     [clojure4.negation :refer :all]
     )
   )
 
 
-
-
-
-
-;(collapse-consts (list (variable :a) (variable :b) (negation (variable :a))))
-;
-
 (defn propagate-neg [expr]
   {:pre [(not (keyword? expr))]}
   (println expr)
   (cond
-    ;(negation? expr) (propagate-neg (args expr))
+
 
     (disjunction? expr) (apply conjunction (map (fn [x] (propagate-neg x)) (args expr)))
 
@@ -39,8 +31,7 @@
         other (remove rem-or expr)
         ]
 
-    ;(println or_terms)
-    ;(println other)
+
     (cond
       (and (conjunction? expr) (not-empty or_terms))
       (let [ands (map (fn [el]
@@ -58,28 +49,13 @@
 
         )
 
-      ;(reduce (fn [acc, el]
-      ;          (let [els (args el)
-      ;                ]
-      ;
-      ;
-      ;
-      ;            )
-      ;          ) or_terms
-      ;        )
-
 
       :else expr)
 
     )
   )
 
-;(distribute (conjunction (variable :a) (variable :b) (disjunction (variable :c) (variable :d))))
 
-
-
-
-;(assert (= (invert (variable :a)) (variable :a)))
 
 (def x (variable :X))
 (def y (variable :Y))
@@ -95,54 +71,20 @@
 
 
 (def pre_f (disjunction nx_or_y (negation ny_or_z)))
-
-(def pre1 (propagate-neg pre_f))
-
-(def pre (distribute pre1))
-
-;(disjunction nx_or_y ny_or_z)
-
-;(distribute disjunction? (rest (disjunction nx_or_y ny_or_z (conjunction x y))))
-
-(let [
-      x (variable :X)
-      y (variable :Y)
-      z (variable :Z)
-      nx (negation x)
-      ny (negation y)
-
-      nx_or_y (disjunction nx y)
-      ny_or_z (disjunction ny z)
-
-      pre_f (disjunction nx_or_y (negation ny_or_z))
-      f (negation pre_f)
-
-      ]
-  ;(assert (= (invert ab) aorb))
-
-  ;(assert (= (invert ab) aorb))
-  (println (distribute (propagate-neg pre_f)))
-  ;(map #(negation % ) (rest naorb))
-  ;)
-
-  )
+(def f (negation pre_f))
 
 
 
 
-; propagate and so on
 
 
-
-;(declare dnf)
+(declare dnf)
 
 (def dnf-rules
   (list
     ;not
     [(fn [expr] (negation? expr))
-     (fn [expr] (
-
-                  )
+     (fn [expr] (dnf (apply propagate-neg (args expr)))
 
        )
 
@@ -151,13 +93,13 @@
     ;none
     [
      (fn [expr] expr)
-     (fn [expr] expr)
+     (fn [expr] (distribute expr))
      ]
 
     )
   )
-;
-;
+
+
 (defn dnf [expr]
   ((some (fn [rule]
            (println rule)
@@ -167,11 +109,7 @@
          dnf-rules)
    expr))
 
-;(dnf (conjunction
-;       (disjunction (variable :a) (variable :b) (negation (variable :b)))
-;       (variable :db)))
-;
-;(negation (negation (variable :a)))
+
 
 
 
