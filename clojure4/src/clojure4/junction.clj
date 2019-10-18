@@ -7,8 +7,10 @@
 
 
 (defn junction? [key]
+  "base func for | and & operators"
   {:pre [(keyword? key)]}
   (fn [expr]
+    "check if expr is one of operators"
     {:pre [(not (keyword? expr))]}
 
     (= key (first expr))
@@ -16,9 +18,10 @@
   )
 
 (defn junction [key, pred, collapse-val]
-  "base func for | and & operations"
+  "base func for | and & operators"
   {:pre [(keyword? key)]}
   (fn [expr & rest]
+    "process operator, expand, collapses const, remove duplicates"
     {:pre [(not (keyword? expr))]}
 
     (cond
@@ -82,26 +85,3 @@
 (def disjunction? (junction? disjunction-key))
 (def disjunction (junction disjunction-key disjunction? true))
 
-
-;(defn conjunction? [expr]
-;  {:pre [(not (keyword? expr))]}
-;  (= ::and (first expr)))
-;
-;
-;(defn conjunction [expr & rest]
-;  "Boolean and(&) "
-;  ;(cons ::and (cons expr rest))
-;
-;
-;  (cond
-;    (empty? rest) (if (conjunction? expr) expr)
-;    :else
-;    (let [expanded (expand conjunction? (cons expr rest) (const false))]
-;      (if (and (= (count expanded) 1) (const? (first expanded)))
-;
-;        (first expanded)
-;        (cons ::and expanded)
-;        )
-;      )
-;    )
-;  )
