@@ -41,6 +41,13 @@
 
             without-true (remove filter-true expanded)
             without-false (remove filter-false expanded)
+
+            filter-one-element (fn [elements]
+                                 (if (= 1 (count elements))
+                                   (first elements)
+                                   (cons key elements)
+                                   )
+                                 )
             ]
         ;(println expanded)
         (cond
@@ -51,7 +58,7 @@
 
           ;operator | and not contains true const
           (and collapse-val (empty? true-present))
-          (if (seq without-false) (cons key without-false) (first false-present))
+          (if (seq without-false) (filter-one-element without-false) (first false-present))
 
           ;operator & and contains false
           (and (not collapse-val) (seq false-present))
@@ -60,9 +67,9 @@
 
           ;operator & and contains false
           (and (not collapse-val) (empty? false-present))
-          (if (seq without-true) (cons key without-true) (first true-present))
+          (if (seq without-true) (filter-one-element without-true) (first true-present))
 
-          :else (cons key expanded)
+          :else (filter-one-element expanded)
 
           )
         )

@@ -33,7 +33,7 @@
 
       (is (= t (disjunction a (negation a))))
 
-      (is (not (= t (disjunction b a (negation a)))))
+      (is (= t (disjunction b a (negation a))))
 
       )
 
@@ -51,7 +51,7 @@
           ]
 
       (is (not (disjunction? a)))
-      (is (disjunction? a-or-b))
+      (is (not (disjunction? a-or-b)));case true || false => true
 
       (is (= a-or-b (disjunction a-or-b a)))
       (is (= a-or-b (disjunction a-or-b a a a a a)))
@@ -63,7 +63,7 @@
       (is (= (negation a-or-b) (negation (disjunction a-or-b a b a-or-b a b a a-or-b a))))
 
 
-      (is (not (= a (disjunction b a (negation a)))))
+      (is (= a (disjunction b a (negation a))))
 
       )
 

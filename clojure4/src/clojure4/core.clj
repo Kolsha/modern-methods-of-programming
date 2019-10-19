@@ -7,23 +7,12 @@
   )
 
 
-(defn propagate-neg [expr]
-  {:pre [(not (keyword? expr))]}
-  (println expr)
-  (cond
-
-
-    (disjunction? expr) (apply conjunction (map (fn [x] (propagate-neg x)) (args expr)))
-
-    (conjunction? expr) (apply disjunction (map (fn [x] (propagate-neg x)) (args expr)))
 
 
 
-    :else (negation expr))
-  )
 
 
-(defn distribute [expr]
+(defn dnf [expr]
   {:pre [(not (keyword? expr))]}
   (let [sel-or (fn [x] (and (not (keyword? x)) (disjunction? x)))
         rem-or (fn [x] (or (keyword? x) (disjunction? x)))
@@ -35,9 +24,9 @@
     (cond
       (and (conjunction? expr) (not-empty or_terms))
       (let [ands (map (fn [el]
-                        (println el)
+                        ;(println el)
                         (map
-                          (fn [x] (println x)
+                          (fn [x]                           ;(println x)
                             (apply conjunction (cons x other)))
 
                           (args el))
@@ -54,7 +43,6 @@
 
     )
   )
-
 
 
 (def x (variable :X))
@@ -74,42 +62,56 @@
 (def f (negation pre_f))
 
 
+(use '[clojure.string :only (join split)])
 
+(defn to-str [expr]
+  {:pre [(not (keyword? expr))]}
+  (cond
 
+    (empty? expr)
+    ""
 
+    (const? expr)
+    (str (const-val expr))
 
-(declare dnf)
+    (variable? expr)
+    (str (name (variable-name expr)))
 
-(def dnf-rules
-  (list
-    ;not
-    [(fn [expr] (negation? expr))
-     (fn [expr] (dnf (apply propagate-neg (args expr)))
+    (negation? expr)
+    (str "!" (apply to-str (args expr)))
 
-       )
+    (disjunction? expr)
+    (str "(" (join " | " (map (fn [x] (to-str x)) (args expr))) ")")
 
-     ]
-
-    ;none
-    [
-     (fn [expr] expr)
-     (fn [expr] (distribute expr))
-     ]
+    (conjunction? expr)
+    (str "(" (join " & " (map (fn [x] (to-str x)) (args expr))) ")")
 
     )
   )
 
+; забыл реализовать подстановку
+(defn substitution [expr vals]
+  (println expr)
+  (cond
 
-(defn dnf [expr]
-  ((some (fn [rule]
-           (println rule)
-           (if ((first rule) expr)
-             (second rule)
-             false))
-         dnf-rules)
-   expr))
+    (and (variable? expr) (contains? vals (variable-name expr)))
+    (const (get vals (variable-name expr)))
+
+    (negation? expr)
+    (negation (substitution (first (args expr)) vals))
+
+    (disjunction? expr)
+    (apply disjunction (map (fn [x] (substitution x vals)) (args expr)))
+
+    (conjunction? expr)
+    (apply conjunction (map (fn [x] (substitution x vals)) (args expr)))
 
 
+    :else expr)
+  )
 
 
-
+;(substitution nx_or_y {:X true :Y true})
+;(to-str f)
+;
+;(to-str (dnf f))

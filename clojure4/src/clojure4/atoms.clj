@@ -27,7 +27,7 @@
     )
   )
 
-(defn negation [expr]
+(defn negation_internal [expr]
   "Boolean not(!,~) "
   "a => !a, !a => a, true => false and so on"
   "(a & b ...) => !(a & b ...)"
@@ -48,7 +48,7 @@
   (let [
         poss-consts (reduce (fn [acc, el]
                               (if
-                                (and (not (const? el)) (in? expr (negation el)))
+                                (and (not (const? el)) (in? expr (negation_internal el)))
                                 (conj acc el)
                                 acc
                                 )

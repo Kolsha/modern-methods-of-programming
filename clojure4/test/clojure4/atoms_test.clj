@@ -1,6 +1,7 @@
 (ns clojure4.atoms-test
   (:require [clojure.test :refer :all]
             [clojure4.atoms :refer :all]
+            [clojure4.negation :refer :all]
             ))
 
 
