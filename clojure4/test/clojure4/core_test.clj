@@ -47,6 +47,11 @@
           na (negation a)
           n_a-and-b (negation a-and-b)
 
+          complex (conjunction a-or-b a b a-and-b)
+
+          t (const true)
+          f (const false)
+
           ]
 
 
@@ -61,6 +66,28 @@
 
 
       (is (= "(!a | !b)" (to-str (dnf n_a-and-b))))
+
+      (is (= t (substitution a-or-b {:a true :b false})))
+
+      (is (= t (substitution a-or-b {:a false :b true})))
+
+      (is (= f (substitution a-or-b {:a false :b false})))
+
+
+      (is (= a (substitution a-or-b {:b false})))
+
+
+      (is (= a (substitution a-and-b {:b true})))
+
+      (is (= b (substitution a-and-b {:a true})))
+
+      (is (= f (substitution a-and-b {:a false})))
+
+      (is (= b (substitution complex {:a true})))
+
+
+
+
 
       )
 

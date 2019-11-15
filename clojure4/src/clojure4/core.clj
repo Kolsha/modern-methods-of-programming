@@ -91,7 +91,6 @@
 
 ; забыл реализовать подстановку
 (defn substitution [expr vals]
-  (println expr)
   (cond
 
     (and (variable? expr) (contains? vals (variable-name expr)))
